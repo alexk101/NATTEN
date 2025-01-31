@@ -44,13 +44,13 @@ mamba create -p $ENV_PATH python=3.11 -y
 mamba activate $ENV_PATH
 
 # Install PyTorch and other dependencies
-python -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm$ROCM_VERSION/
+$ENV_PATH/bin/pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm$ROCM_VERSION/
 mamba install -p $ENV_PATH fvcore -y
 
 # Additional development dependencies
 mamba install -p $ENV_PATH pytest -y
 
 # Export the environment
-conda env export > natten_env.yaml
+conda env export -p $ENV_PATH > natten_env.yaml
 
 echo "Environment created and exported to natten_env.yaml" 
