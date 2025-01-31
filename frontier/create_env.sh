@@ -11,8 +11,7 @@ mamba create -p $HOME/.miniforge/envs/natten_dev python=3.11 -y
 mamba activate $HOME/.miniforge/envs/natten_dev
 
 # Install PyTorch and other dependencies
-mamba install pytorch=2.0.1 torchvision pytorch-rocm=5.7 -c pytorch -c conda-forge -y
-mamba install cmake ninja -y
+python -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm6.2/
 mamba install fvcore -y
 
 # Additional development dependencies
