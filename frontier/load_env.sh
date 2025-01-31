@@ -1,6 +1,13 @@
 #!/bin/bash
 
-# Load miniforge
+ROCM_VERSION=6.3.1
+
+# Load required modules
+module load PrgEnv-cray
+module load rocm/$ROCM_VERSION
+module load craype-accel-amd-gfx90a
+module load cmake
+module load ninja/1.11.1
 module load miniforge3
 
 # Create environment from yaml if it doesn't exist
