@@ -7,6 +7,7 @@ module load PrgEnv-cray
 module load rocm/$ROCM_VERSION
 module load craype-accel-amd-gfx90a
 module load cmake
+module load gcc/12.2.0
 module load ninja/1.11.1
 
 # Set NATTEN environment variables
