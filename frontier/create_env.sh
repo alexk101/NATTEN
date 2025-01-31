@@ -33,6 +33,14 @@ if [ -d "$ENV_PATH" ]; then
     else
         echo "Keeping existing environment. Exiting..."
         mamba activate $ENV_PATH
+
+        # Build and install NATTEN
+        cd ..
+        pip install -e .
+        cd frontier
+
+        echo "NATTEN package built and installed in development mode"
+
         exit 0
     fi
 fi
@@ -54,3 +62,10 @@ mamba install -p $ENV_PATH pytest -y
 conda env export -p $ENV_PATH > natten_env.yaml
 
 echo "Environment created and exported to natten_env.yaml" 
+
+# Build and install NATTEN
+cd ..
+pip install -e .
+cd frontier
+
+echo "NATTEN package built and installed in development mode"
