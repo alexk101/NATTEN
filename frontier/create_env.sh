@@ -2,20 +2,21 @@
 
 # Load miniforge
 module load miniforge3
+conda init
 
 # Create conda environment
-conda create -n natten_dev python=3.8 -y
+mamba create -p $HOME/.miniforge/envs/natten_dev python=3.11 -y
 
 # Activate environment
-conda activate natten_dev
+mamba activate $HOME/.miniforge/envs/natten_dev
 
 # Install PyTorch and other dependencies
-conda install pytorch=2.0.1 torchvision pytorch-cuda=11.7 -c pytorch -c nvidia -y
-conda install cmake ninja -y
-conda install fvcore -y
+mamba install pytorch=2.0.1 torchvision pytorch-rocm=5.7 -c pytorch -c conda-forge -y
+mamba install cmake ninja -y
+mamba install fvcore -y
 
 # Additional development dependencies
-conda install pytest -y
+mamba install pytest -y
 
 # Export the environment
 conda env export > natten_env.yaml

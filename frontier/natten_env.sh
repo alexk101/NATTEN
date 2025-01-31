@@ -3,7 +3,9 @@
 # Load required modules
 module load PrgEnv-cray
 module load rocm/6.3.1
+module load craype-accel-amd-gfx90a
 module load cmake
+module load ninja/1.11.1
 
 # Set NATTEN environment variables
 export NATTEN_WITH_ACPP=1
