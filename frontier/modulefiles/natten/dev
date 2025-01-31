@@ -1,0 +1,19 @@
+#%Module1.0
+
+proc ModulesHelp { } {
+    puts stderr "Sets up environment for NATTEN development on Frontier"
+}
+
+module-whatis "NATTEN development environment"
+
+# Load required modules
+module load PrgEnv-cray
+module load rocm/5.7.0
+module load pytorch/2.0.1
+module load cmake
+
+# Set environment variables
+setenv ACPP_HOME /opt/rocm-5.7.0/lib/adaptivecpp
+setenv NATTEN_WITH_ACPP 1
+setenv NATTEN_ACPP_ARCH gfx90a
+setenv NATTEN_N_WORKERS 8
