@@ -32,6 +32,7 @@ from natten.utils.testing import (
     skip_if_experimental_ops_are_not_supported,
     skip_if_fna_is_not_supported,
     skip_if_torch_compile_is_not_supported,
+    skip_if_acpp_is_not_supported,
 )
 
 
@@ -40,6 +41,7 @@ def _reset_everything():
     natten.use_gemm_na()
     natten.use_tf32_in_gemm_na()
     natten.use_fused_na(False, kv_parallel=False)
+    natten.use_acpp_na(False)
     os.environ["NATTEN_LOG_LEVEL"] = "CRITICAL"
 
 
@@ -59,6 +61,8 @@ class TorchCompileTests(unittest.TestCase):
         is_causal,
         qkv_bias,
         use_experimental_ops,
+        device="cuda",
+        dtype=torch.float32,
     ):
         mod = natten.NeighborhoodAttention1D
         if hasattr(kernel_size, "__len__") and len(kernel_size) == 2:
@@ -74,11 +78,11 @@ class TorchCompileTests(unittest.TestCase):
             is_causal=is_causal,
             qkv_bias=qkv_bias,
             use_experimental_ops=use_experimental_ops,
-        ).cuda()
+        ).to(device=device, dtype=dtype)
 
-    def _build_input(self, batch, spatial_extent, heads, dim_per_head):
+    def _build_input(self, batch, spatial_extent, heads, dim_per_head, device="cuda", dtype=torch.float32):
         shape = [batch, *spatial_extent, heads * dim_per_head]
-        return torch.randn(shape, device="cuda")
+        return torch.randn(shape, device=device, dtype=dtype)
 
     def _test_torch_compile(
         self,
@@ -91,6 +95,8 @@ class TorchCompileTests(unittest.TestCase):
         is_causal,
         qkv_bias,
         use_experimental_ops,
+        device="cuda",
+        dtype=torch.float32,
     ):
         m = self._build_model(
             dim_per_head=dim_per_head,
@@ -100,6 +106,8 @@ class TorchCompileTests(unittest.TestCase):
             is_causal=is_causal,
             qkv_bias=qkv_bias,
             use_experimental_ops=use_experimental_ops,
+            device=device,
+            dtype=dtype,
         )
         m_compiled = torch.compile(m, fullgraph=True)
         x = self._build_input(
@@ -107,6 +115,8 @@ class TorchCompileTests(unittest.TestCase):
             spatial_extent=spatial_extent,
             heads=heads,
             dim_per_head=dim_per_head,
+            device=device,
+            dtype=dtype,
         )
 
         with torch.inference_mode():
@@ -202,6 +212,75 @@ class TorchCompileTests(unittest.TestCase):
             is_causal=(True, False, False),
             qkv_bias=True,
             use_experimental_ops=True,
+        )
+
+    @skip_if_torch_compile_is_not_supported()
+    @skip_if_experimental_ops_are_not_supported()
+    @skip_if_acpp_is_not_supported()
+    def test_torch_compile_acpp_naive_gfx908(self):
+        natten.use_acpp_na()
+        self._test_torch_compile(
+            batch=1,
+            spatial_extent=(16, 10),
+            heads=2,
+            dim_per_head=32,
+            kernel_size=(5, 3),
+            dilation=(2, 1),
+            is_causal=(False, False),
+            qkv_bias=True,
+            use_experimental_ops=False,
+            device="gfx908",
+            dtype=torch.float32,
+        )
+
+        # Test float16 which is supported on gfx908
+        self._test_torch_compile(
+            batch=1,
+            spatial_extent=(16, 10),
+            heads=2,
+            dim_per_head=32,
+            kernel_size=(5, 3),
+            dilation=(2, 1),
+            is_causal=(False, False),
+            qkv_bias=True,
+            use_experimental_ops=False,
+            device="gfx908",
+            dtype=torch.float16,
+        )
+
+    @skip_if_torch_compile_is_not_supported()
+    @skip_if_experimental_ops_are_not_supported()
+    @skip_if_acpp_is_not_supported()
+    def test_torch_compile_acpp_naive_gfx90a(self):
+        natten.use_acpp_na()
+        # Test bfloat16 which is only supported on gfx90a
+        self._test_torch_compile(
+            batch=1,
+            spatial_extent=(16, 10),
+            heads=2,
+            dim_per_head=32,
+            kernel_size=(5, 3),
+            dilation=(2, 1),
+            is_causal=(False, False),
+            qkv_bias=True,
+            use_experimental_ops=False,
+            device="gfx90a",
+            dtype=torch.bfloat16,
+        )
+
+        # Test 3D case
+        self._test_torch_compile(
+            batch=1,
+            spatial_extent=(6, 5, 8),
+            heads=2,
+            dim_per_head=32,
+            kernel_size=(5, 3, 7),
+            dilation=(1, 1, 1),
+            is_causal=(False, False, False),
+            qkv_bias=True,
+            use_experimental_ops=False,
+            device="gfx90a",
+            dtype=torch.float32,
         )
 
 

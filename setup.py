@@ -154,6 +154,30 @@ def arch_list_to_cmake_tags(arch_list: List[int]) -> str:
     return "-real;".join([str(x) for x in arch_list]) + "-real"
 
 
+def get_acpp_home():
+    """Returns AdaptiveCpp install location"""
+    if IS_WINDOWS:
+        return None  # AdaptiveCpp doesn't support Windows yet
+    
+    acpp_home = os.environ.get('ACPP_HOME')
+    if acpp_home:
+        return acpp_home
+    
+    # Check common install locations
+    common_paths = ['/opt/adaptivecpp', '/usr/local/adaptivecpp']
+    for path in common_paths:
+        if os.path.exists(path):
+            return path
+    return None
+
+def get_acpp_arch():
+    """Get target AMD GPU architecture"""
+    arch = os.environ.get('NATTEN_ACPP_ARCH', 'gfx908')  # Default to MI100
+    valid_archs = ['gfx908', 'gfx90a', 'gfx940']  # From _ARCH_TO_UPPER_BOUND
+    if arch not in valid_archs:
+        print(f"Warning: {arch} is not in supported architectures: {valid_archs}")
+    return arch
+
 class BuildExtension(build_ext):
     def build_extension(self, ext):
         this_dir = path.dirname(path.abspath(__file__))
@@ -214,6 +238,21 @@ class BuildExtension(build_ext):
         so_dir = os.path.join(self.build_lib, os.path.dirname(output_so_name))
         if not os.path.exists(so_dir):
             os.makedirs(so_dir)
+
+        # AdaptiveCpp Detection
+        acpp_home = get_acpp_home()
+        has_acpp = acpp_home is not None and os.environ.get('NATTEN_WITH_ACPP', '0') == '1'
+        
+        if has_acpp:
+            cmake_args.append(f"-DACPP_HOME={acpp_home}")
+            cmake_args.append("-DNATTEN_WITH_ACPP=1")
+            
+            acpp_arch = get_acpp_arch()
+            cmake_args.append(f"-DNATTEN_ACPP_ARCH={acpp_arch}")
+            
+            # Add AdaptiveCpp specific compile flags
+            cmake_args.append("-DCMAKE_CXX_FLAGS=-fsycl")
+            cmake_args.append("-DCMAKE_SYCL_FLAGS=-fsycl-targets=amdgcn-amd-amdhsa")
 
         # Config and build the extension
         subprocess.check_call(

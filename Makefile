@@ -1,7 +1,9 @@
 .PHONY: sdist clean uninstall install-deps install test style quality
 
 WITH_CUDA=
+WITH_ACPP=
 CUDA_ARCH=
+ACPP_ARCH=
 WORKERS=
 VERBOSE=
 
@@ -55,10 +57,12 @@ uninstall:
 install: 
 	@echo "Installing NATTEN from source"
 	NATTEN_CUDA_ARCH="${CUDA_ARCH}" \
-			 NATTEN_N_WORKERS="${WORKERS}" \
-			 NATTEN_WITH_CUDA="${WITH_CUDA}" \
-			 NATTEN_VERBOSE="${VERBOSE}" \
-			 pip install -v -e . 2>&1 | tee install.out
+	NATTEN_ACPP_ARCH="${ACPP_ARCH}" \
+	NATTEN_N_WORKERS="${WORKERS}" \
+	NATTEN_WITH_CUDA="${WITH_CUDA}" \
+	NATTEN_WITH_ACPP="${WITH_ACPP}" \
+	NATTEN_VERBOSE="${VERBOSE}" \
+	pip install -v -e . 2>&1 | tee install.out
 
 test:
 	pytest -v -x ./tests

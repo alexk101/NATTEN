@@ -66,11 +66,11 @@ compatible with NATTEN.
 
 ## Feature availability
 
-| Problem space | CPU backend | CUDA backend     |
-| -----------   | ----------- | ---------------- |
-| 1D            | naive       | naive, gemm, fna |
-| 2D            | naive       | naive, gemm, fna |
-| 3D            | naive       | naive, fna       |
+| Problem space | CPU backend | CUDA backend     | AMD GPU backend |
+| -----------   | ----------- | ---------------- | --------------- |
+| 1D            | naive       | naive, gemm, fna | naive, gemm, fna|
+| 2D            | naive       | naive, gemm, fna | naive, gemm, fna|
+| 3D            | naive       | naive, fna       | naive, fna      |
 
 ### CPU
 
@@ -115,6 +115,25 @@ Features that will likely no longer be worked on or improved:
   * Since FNA covers more features than our unfused GEMM-based kernels, and we know it to be a better solution
     (please refer to Faster Neighborhood Attention for details), we do not plan to extend or improve these kernels.
   * This includes support for varying parameters, causal masking, and 3-D problems.
+
+### AMD GPU (AdaptiveCpp)
+
+| Problem space | Backend | Causal masking     | Varying parameters | Relative positional bias | Autograd support | Min. Arch |
+| -----------   | ------- | ------------------ | ------------------ | ----------------------- | --------------- | --------- |
+| 1D            | naive   | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+| 2D            | naive   | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+| 3D            | naive   | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+| 1D            | gemm    | -                  | -                 | :white_check_mark:      | Reverse mode    | gfx908    |
+| 2D            | gemm    | -                  | -                 | :white_check_mark:      | Reverse mode    | gfx908    |
+| 1D            | fna     | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+| 2D            | fna     | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+| 3D            | fna     | :white_check_mark: | :white_check_mark:| :white_check_mark:      | Reverse mode    | gfx908    |
+
+Notes:
+* FP16 and BF16 kernels are only available on gfx90a and above
+* GEMM backend on gfx908 and gfx90a can only do FP16
+* Relative positional biases are not yet supported when any axis has causal masking enabled
+* Relative positional biases are not supported in FNA during backward pass
 
 ## License
 NATTEN is released under the [MIT License](LICENSE).

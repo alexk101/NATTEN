@@ -2,15 +2,27 @@
 
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 if(${NATTEN_WITH_CUDA})
-project(natten LANGUAGES CXX CUDA)
+  project(natten LANGUAGES CXX CUDA)
+elseif(${NATTEN_WITH_ACPP})
+  project(natten LANGUAGES CXX)
 else()
-project(natten LANGUAGES CXX)
+  project(natten LANGUAGES CXX)
 endif()
 
+# Find CUDA if enabled
 if(${NATTEN_WITH_CUDA})
-find_package(CUDA 11.0 REQUIRED)
-message("Building NATTEN with CUDA.")
+  find_package(CUDA 11.0 REQUIRED)
+  message("Building NATTEN with CUDA.")
 endif()
+
+# Find AdaptiveCpp if enabled
+if(${NATTEN_WITH_ACPP})
+  find_package(AdaptiveCpp REQUIRED)
+  message("Building NATTEN with AdaptiveCpp for ${NATTEN_ACPP_ARCH}")
+  add_definitions(-DNATTEN_WITH_ACPP)
+  add_definitions(-DNATTEN_ACPP_ARCH=${NATTEN_ACPP_ARCH})
+endif()
+
 set(CXX_STD "17" CACHE STRING "C++ standard")
 
 
@@ -217,9 +229,22 @@ add_library(natten SHARED ${ALL_SOURCES})
 
 set_target_properties(natten PROPERTIES PREFIX "" OUTPUT_NAME ${OUTPUT_FILE_NAME})
 set_target_properties(natten PROPERTIES LINKER_LANGUAGE CXX)
+
 if(${NATTEN_WITH_CUDA})
-  message("Building NATTEN for the following architectures: ${NATTEN_CUDA_ARCH_LIST}")
+  message("Building NATTEN for CUDA architectures: ${NATTEN_CUDA_ARCH_LIST}")
   set_target_properties(natten PROPERTIES CUDA_ARCHITECTURES "${NATTEN_CUDA_ARCH_LIST}")
+endif()
+
+if(${NATTEN_WITH_ACPP})
+  target_include_directories(natten PRIVATE ${ACPP_INCLUDE_DIRS})
+  target_link_libraries(natten PRIVATE ${ACPP_LIBRARIES})
+  
+  # Add SYCL compilation flags
+  target_compile_options(natten PRIVATE
+    -fsycl
+    -fsycl-targets=amdgcn-amd-amdhsa
+    -Xsycl-target-backend --offload-arch=${NATTEN_ACPP_ARCH}
+  )
 endif()
 
 if(${NATTEN_IS_MAC})

@@ -25,7 +25,7 @@ import sys
 
 import torch
 
-from .. import has_cuda, has_fna, has_fp64_gemm, has_gemm
+from .. import has_cuda, has_fna, has_fp64_gemm, has_gemm, has_acpp
 
 _IS_CUDA_AVAILABLE = torch.cuda.is_available() and has_cuda()
 
@@ -46,6 +46,7 @@ _SUPPORTS_EXPERIMENTAL_OPS = [int(x) for x in torch.__version__.split(".")[:2]] 
 _HAS_GEMM_KERNELS = has_gemm()
 _GEMM_WITH_DOUBLE_PRECISION = has_fp64_gemm()
 _HAS_FNA_KERNELS = has_fna()
+_HAS_ACPP = has_acpp()
 
 try:
     import fvcore  # type: ignore  # noqa: F401
@@ -193,3 +194,16 @@ def skip_if_torch_flop_count_is_not_supported():
 
 def fna_supports_additional_kv():
     return _SUPPORTS_FNA_WITH_ADDITIONAL_KV
+
+
+def skip_if_acpp_is_not_supported():
+    def decorator(f):
+        def wrapper(self, *args, **kwargs):
+            if not _HAS_ACPP:
+                self.skipTest("ACPP is not supported.")
+            else:
+                return f(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

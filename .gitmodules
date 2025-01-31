@@ -1,3 +1,7 @@
 [submodule "third_party/cutlass"]
 	path = third_party/cutlass
 	url = https://github.com/NVIDIA/cutlass/
+
+[submodule "third_party/AdaptiveCpp"]
+	path = third_party/AdaptiveCpp
+	url = https://github.com/AdaptiveCpp/AdaptiveCpp.git
