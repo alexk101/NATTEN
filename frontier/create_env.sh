@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROCM_VERSION=6.3.1
+ROCM_VERSION=6.2.4
 
 # Load required modules
 module load PrgEnv-cray
