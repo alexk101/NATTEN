@@ -13,32 +13,35 @@ function(build_boost_from_submodule)
     
     message(STATUS "Building Boost from submodule at: ${BOOST_SUBMODULE_PATH}")
     
+    # Bootstrap
     execute_process(
-        COMMAND ${CMAKE_COMMAND} 
-            -S ${BOOST_SUBMODULE_PATH}
-            -B ${BOOST_BUILD_DIR}
-            -DBUILD_SHARED_LIBS=ON
-            -DBOOST_INCLUDE_LIBRARIES=context,fiber
-            -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/boost_install
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        RESULT_VARIABLE BOOST_CONFIG_RESULT
+        COMMAND ./bootstrap.sh --prefix=${PROJECT_BINARY_DIR}/boost_install --with-libraries=context,fiber
+        WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
+        RESULT_VARIABLE BOOTSTRAP_RESULT
+        OUTPUT_VARIABLE BOOTSTRAP_OUTPUT
+        ERROR_VARIABLE BOOTSTRAP_ERROR
     )
     
-    if(NOT BOOST_CONFIG_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to configure Boost")
+    if(NOT BOOTSTRAP_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to bootstrap Boost: ${BOOTSTRAP_ERROR}")
     endif()
     
+    # Build and install using b2
     execute_process(
-        COMMAND ${CMAKE_COMMAND} --build ${BOOST_BUILD_DIR} --target install
-        RESULT_VARIABLE BOOST_BUILD_RESULT
+        COMMAND ./b2 install --prefix=${PROJECT_BINARY_DIR}/boost_install --with-context --with-fiber
+        WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
+        RESULT_VARIABLE BUILD_RESULT
+        OUTPUT_VARIABLE BUILD_OUTPUT
+        ERROR_VARIABLE BUILD_ERROR
     )
     
-    if(NOT BOOST_BUILD_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to build Boost")
+    if(NOT BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build Boost: ${BUILD_ERROR}")
     endif()
     
     set(BOOST_ROOT ${PROJECT_BINARY_DIR}/boost_install PARENT_SCOPE)
+    set(BOOST_INCLUDEDIR ${PROJECT_BINARY_DIR}/boost_install/include PARENT_SCOPE)
+    set(BOOST_LIBRARYDIR ${PROJECT_BINARY_DIR}/boost_install/lib PARENT_SCOPE)
 endfunction()
 
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
