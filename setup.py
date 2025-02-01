@@ -159,11 +159,18 @@ def get_acpp_home():
     if IS_WINDOWS:
         return None  # AdaptiveCpp doesn't support Windows yet
     
+    # Check submodule location first
+    this_dir = path.dirname(path.abspath(__file__))
+    submodule_path = path.join(this_dir, "third_party/AdaptiveCpp")
+    if path.exists(submodule_path):
+        return submodule_path
+    
+    # Then check environment variable
     acpp_home = os.environ.get('ACPP_HOME')
     if acpp_home:
         return acpp_home
     
-    # Check common install locations
+    # Finally check common install locations
     common_paths = ['/opt/adaptivecpp', '/usr/local/adaptivecpp']
     for path in common_paths:
         if os.path.exists(path):
