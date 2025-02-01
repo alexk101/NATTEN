@@ -59,7 +59,11 @@ endif()
 # Check if config files were generated
 set(CONFIG_FILE "${ACPP_SUBMODULE_PATH}/build/install/lib/cmake/AdaptiveCpp/adaptivecpp-config.cmake")
 message(STATUS "Looking for config file at: ${CONFIG_FILE}")
-message(STATUS "Config file exists: ${EXISTS ${CONFIG_FILE}}")
+if(EXISTS "${CONFIG_FILE}")
+    message(STATUS "Config file exists")
+else()
+    message(STATUS "Config file not found")
+endif()
 
 # Now look for the installed AdaptiveCpp
 find_path(ACPP_INCLUDE_DIR
