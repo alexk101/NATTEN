@@ -22,8 +22,18 @@ message(STATUS "Using ROCM_PATH: ${ROCM_PATH}")
 # First build and install AdaptiveCpp from submodule if not already done
 set(ACPP_SUBMODULE_PATH "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp")
 message(STATUS "Checking submodule path: ${ACPP_SUBMODULE_PATH}")
-message(STATUS "Submodule exists: ${EXISTS ${ACPP_SUBMODULE_PATH}}")
-message(STATUS "Build directory exists: ${EXISTS ${ACPP_SUBMODULE_PATH}/build}")
+
+if(EXISTS "${ACPP_SUBMODULE_PATH}")
+    message(STATUS "Submodule exists")
+else()
+    message(STATUS "Submodule not found")
+endif()
+
+if(EXISTS "${ACPP_SUBMODULE_PATH}/build")
+    message(STATUS "Build directory exists")
+else()
+    message(STATUS "Build directory not found")
+endif()
 
 if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build")
     message(STATUS "Building AdaptiveCpp from submodule using ROCm at: ${ROCM_PATH}")
