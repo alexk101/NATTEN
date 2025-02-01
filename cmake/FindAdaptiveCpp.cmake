@@ -6,47 +6,6 @@
 # ACPP_LIBRARIES - AdaptiveCpp libraries
 # ACPP_VERSION - AdaptiveCpp version
 
-# Function to build Boost from submodule if needed
-function(build_boost_from_submodule)
-    set(BOOST_SUBMODULE_PATH "${PROJECT_ROOT}/third_party/boost")
-    set(BOOST_BUILD_DIR "${BOOST_SUBMODULE_PATH}/__build__")
-    
-    message(STATUS "Building Boost from submodule at: ${BOOST_SUBMODULE_PATH}")
-    
-    # Bootstrap with all required components
-    execute_process(
-        COMMAND ./bootstrap.sh --prefix=${PROJECT_BINARY_DIR}/boost_install 
-            --with-libraries=context,fiber,atomic,chrono,system
-        WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
-        RESULT_VARIABLE BOOTSTRAP_RESULT
-        OUTPUT_VARIABLE BOOTSTRAP_OUTPUT
-        ERROR_VARIABLE BOOTSTRAP_ERROR
-    )
-    
-    if(NOT BOOTSTRAP_RESULT EQUAL 0)
-        message(STATUS "Bootstrap output: ${BOOTSTRAP_OUTPUT}")
-        message(FATAL_ERROR "Failed to bootstrap Boost: ${BOOTSTRAP_ERROR}")
-    endif()
-    
-    # Build and install using b2 with all required components
-    execute_process(
-        COMMAND ./b2 install --prefix=${PROJECT_BINARY_DIR}/boost_install 
-            --with-context --with-fiber --with-atomic --with-chrono --with-system
-        WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
-        RESULT_VARIABLE BUILD_RESULT
-        OUTPUT_VARIABLE BUILD_OUTPUT
-        ERROR_VARIABLE BUILD_ERROR
-    )
-    
-    if(NOT BUILD_RESULT EQUAL 0)
-        message(STATUS "Build output: ${BUILD_OUTPUT}")
-        message(FATAL_ERROR "Failed to build Boost: ${BUILD_ERROR}")
-    endif()
-    
-    set(BOOST_ROOT ${PROJECT_BINARY_DIR}/boost_install PARENT_SCOPE)
-    set(BOOST_INCLUDEDIR ${PROJECT_BINARY_DIR}/boost_install/include PARENT_SCOPE)
-    set(BOOST_LIBRARYDIR ${PROJECT_BINARY_DIR}/boost_install/lib PARENT_SCOPE)
-endfunction()
 
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
@@ -76,11 +35,6 @@ if(NOT AdaptiveCpp_FOUND)
         
         # Try to find Boost first
         find_package(Boost COMPONENTS context fiber QUIET)
-
-        if(NOT Boost_FOUND)
-            build_boost_from_submodule()
-            find_package(Boost COMPONENTS context fiber REQUIRED)
-        endif()
 
         message(STATUS "Using Boost:")
         message(STATUS "  Version: ${Boost_VERSION}")

@@ -8,6 +8,7 @@ module load rocm/$ROCM_VERSION
 module load craype-accel-amd-gfx90a
 module load cmake
 module load ninja/1.11.1
+module load boost/1.85.0
 
 # Set NATTEN environment variables
 # AdaptiveCpp will be detected from submodule automatically
