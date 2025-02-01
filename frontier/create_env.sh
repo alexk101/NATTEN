@@ -3,6 +3,7 @@
 ROCM_VERSION=6.2.4
 
 # Load required modules
+module load Core/24.07
 module load PrgEnv-cray
 module load rocm/$ROCM_VERSION
 module load craype-accel-amd-gfx90a
