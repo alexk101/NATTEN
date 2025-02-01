@@ -4,3 +4,7 @@
 [submodule "third_party/AdaptiveCpp"]
 	path = third_party/AdaptiveCpp
 	url = git@github.com:AdaptiveCpp/AdaptiveCpp.git
+[submodule "third_party/boost"]
+	path = third_party/boost
+	url = git@github.com:boostorg/boost.git
+	branch = boost-1.87.0
