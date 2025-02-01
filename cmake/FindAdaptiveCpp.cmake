@@ -19,8 +19,10 @@ if(NOT DEFINED ROCM_PATH)
 endif()
 message(STATUS "Using ROCM_PATH: ${ROCM_PATH}")
 
-# First build and install AdaptiveCpp from submodule if not already done
-set(ACPP_SUBMODULE_PATH "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp")
+# Get the correct path to the submodule
+get_filename_component(PROJECT_ROOT "${CMAKE_SOURCE_DIR}/.." ABSOLUTE)
+set(ACPP_SUBMODULE_PATH "${PROJECT_ROOT}/third_party/AdaptiveCpp")
+message(STATUS "Project root: ${PROJECT_ROOT}")
 message(STATUS "Checking submodule path: ${ACPP_SUBMODULE_PATH}")
 
 if(EXISTS "${ACPP_SUBMODULE_PATH}")
