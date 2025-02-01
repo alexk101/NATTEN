@@ -10,7 +10,7 @@ else()
 endif()
 
 # Add cmake directory to module path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
 
 # Find CUDA if enabled
 if(${NATTEN_WITH_CUDA})
