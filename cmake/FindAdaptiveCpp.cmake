@@ -6,6 +6,41 @@
 # ACPP_LIBRARIES - AdaptiveCpp libraries
 # ACPP_VERSION - AdaptiveCpp version
 
+# Function to build Boost from submodule if needed
+function(build_boost_from_submodule)
+    set(BOOST_SUBMODULE_PATH "${PROJECT_ROOT}/third_party/boost")
+    set(BOOST_BUILD_DIR "${BOOST_SUBMODULE_PATH}/__build__")
+    
+    message(STATUS "Building Boost from submodule at: ${BOOST_SUBMODULE_PATH}")
+    
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} 
+            -S ${BOOST_SUBMODULE_PATH}
+            -B ${BOOST_BUILD_DIR}
+            -DBUILD_SHARED_LIBS=ON
+            -DBOOST_INCLUDE_LIBRARIES=context,fiber
+            -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/boost_install
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        RESULT_VARIABLE BOOST_CONFIG_RESULT
+    )
+    
+    if(NOT BOOST_CONFIG_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to configure Boost")
+    endif()
+    
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} --build ${BOOST_BUILD_DIR} --target install
+        RESULT_VARIABLE BOOST_BUILD_RESULT
+    )
+    
+    if(NOT BOOST_BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to build Boost")
+    endif()
+    
+    set(BOOST_ROOT ${PROJECT_BINARY_DIR}/boost_install PARENT_SCOPE)
+endfunction()
+
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_CURRENT_LIST_DIR: ${CMAKE_CURRENT_LIST_DIR}")
@@ -105,42 +140,3 @@ if(AdaptiveCpp_FOUND)
     set(ACPP_LIBRARIES ${AdaptiveCpp_LIBRARY})
     set(AdaptiveCpp_DIR ${AdaptiveCpp_DIR})
 endif()
-
-# Function to build Boost from submodule if needed
-function(build_boost_from_submodule)
-    set(BOOST_SUBMODULE_PATH "${PROJECT_ROOT}/third_party/boost")
-    set(BOOST_BUILD_DIR "${BOOST_SUBMODULE_PATH}/__build__")
-    
-    message(STATUS "Building Boost from submodule at: ${BOOST_SUBMODULE_PATH}")
-    
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} 
-            -S ${BOOST_SUBMODULE_PATH}
-            -B ${BOOST_BUILD_DIR}
-            -DBUILD_SHARED_LIBS=ON
-            -DBOOST_INCLUDE_LIBRARIES=context,fiber
-            -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/boost_install
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        RESULT_VARIABLE BOOST_CONFIG_RESULT
-        OUTPUT_VARIABLE BOOST_CONFIG_OUTPUT
-        ERROR_VARIABLE BOOST_CONFIG_ERROR
-    )
-    
-    if(NOT BOOST_CONFIG_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to configure Boost: ${BOOST_CONFIG_ERROR}")
-    endif()
-    
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} --build ${BOOST_BUILD_DIR} --target install
-        RESULT_VARIABLE BOOST_BUILD_RESULT
-        OUTPUT_VARIABLE BOOST_BUILD_OUTPUT
-        ERROR_VARIABLE BOOST_BUILD_ERROR
-    )
-    
-    if(NOT BOOST_BUILD_RESULT EQUAL 0)
-        message(FATAL_ERROR "Failed to build Boost: ${BOOST_BUILD_ERROR}")
-    endif()
-    
-    set(BOOST_ROOT ${PROJECT_BINARY_DIR}/boost_install PARENT_SCOPE)
-endfunction() 
