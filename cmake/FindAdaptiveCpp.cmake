@@ -35,8 +35,22 @@ if(NOT AdaptiveCpp_FOUND)
                 -B "${ACPP_SUBMODULE_PATH}/build"
                 -DWITH_ROCM_BACKEND=ON
                 -DROCM_PATH=${ROCM_PATH}
+                -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
+                -DBOOST_ROOT=$ENV{BOOST_ROOT}
+                -DBOOST_INCLUDEDIR=$ENV{BOOST_ROOT}/include
+                -DBOOST_LIBRARYDIR=$ENV{BOOST_ROOT}/lib
+                -DCMAKE_POLICY_DEFAULT_CMP0144=NEW
+                -DBoost_USE_STATIC_LIBS=OFF
+                -DBoost_USE_MULTITHREADED=ON
+                -DCMAKE_CXX_COMPILER=CC
+                -DCMAKE_C_COMPILER=cc
             RESULT_VARIABLE BUILD_RESULT
+            OUTPUT_VARIABLE BUILD_OUTPUT
+            ERROR_VARIABLE BUILD_ERROR
         )
+        
+        message(STATUS "Build output: ${BUILD_OUTPUT}")
+        message(STATUS "Build error: ${BUILD_ERROR}")
         
         if(BUILD_RESULT EQUAL 0)
             find_package(AdaptiveCpp REQUIRED CONFIG 
