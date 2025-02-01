@@ -33,20 +33,8 @@ if(NOT AdaptiveCpp_FOUND)
     if(EXISTS "${ACPP_SUBMODULE_PATH}/CMakeLists.txt")
         message(STATUS "Building AdaptiveCpp from submodule")
         
-        # Try to find Boost first
-        set(Boost_USE_STATIC_LIBS OFF)
-        set(Boost_USE_MULTITHREADED ON)
-        find_package(Boost COMPONENTS context REQUIRED)
-
-        if(NOT Boost_FOUND)
-            message(FATAL_ERROR "Could not find Boost with context component")
-        endif()
-
-        message(STATUS "Using Boost:")
-        message(STATUS "  Version: ${Boost_VERSION}")
-        message(STATUS "  Include dirs: ${Boost_INCLUDE_DIRS}")
-        message(STATUS "  Library dirs: ${Boost_LIBRARY_DIRS}")
-        message(STATUS "  Context library: ${Boost_CONTEXT_LIBRARY}")
+        # Include our Boost build system
+        include(${CMAKE_CURRENT_LIST_DIR}/FindBoostDeps.cmake)
         
         execute_process(
             COMMAND ${CMAKE_COMMAND} 
@@ -57,10 +45,7 @@ if(NOT AdaptiveCpp_FOUND)
                 -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
                 -DCMAKE_CXX_COMPILER=CC
                 -DCMAKE_C_COMPILER=cc
-                -DBoost_DIR=${Boost_DIR}
-                -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIRS}
-                -DBoost_LIBRARY_DIR=${Boost_LIBRARY_DIRS}
-                -DBOOST_ROOT=${Boost_DIR}
+                ${BOOST_CMAKE_ARGS}
             RESULT_VARIABLE BUILD_RESULT
             OUTPUT_VARIABLE BUILD_OUTPUT
             ERROR_VARIABLE BUILD_ERROR
