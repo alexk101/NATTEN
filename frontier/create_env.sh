@@ -8,6 +8,7 @@ module load rocm/$ROCM_VERSION
 module load craype-accel-amd-gfx90a
 module load cmake
 module load ninja/1.11.1
+module load boost/1.85.0
 
 # Set NATTEN environment variables
 # AdaptiveCpp will be detected from submodule automatically
@@ -61,10 +62,7 @@ mamba activate $ENV_PATH
 
 # Install PyTorch and other dependencies
 $ENV_PATH/bin/pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm$ROCM_VERSION/
-mamba install -p $ENV_PATH fvcore -y
-
-# Additional development dependencies
-mamba install -p $ENV_PATH pytest -y
+mamba install -p $ENV_PATH fvcore pytest -y
 
 # Export the environment
 conda env export -p $ENV_PATH > natten_env.yaml
