@@ -1,9 +1,6 @@
 # Copyright (c) 2022-2024 Ali Hassani.
 
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
-# Add cmake directory to module path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
 if(${NATTEN_WITH_CUDA})
   project(natten LANGUAGES CXX CUDA)
 elseif(${NATTEN_WITH_ACPP})
@@ -11,6 +8,9 @@ elseif(${NATTEN_WITH_ACPP})
 else()
   project(natten LANGUAGES CXX)
 endif()
+
+# Add cmake directory to module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Find CUDA if enabled
 if(${NATTEN_WITH_CUDA})
