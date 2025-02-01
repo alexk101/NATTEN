@@ -1,10 +1,19 @@
 # First try to find system Boost
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(BOOST COMPONENTS context QUIET)
+set(Boost_NO_SYSTEM_PATHS TRUE)
+set(Boost_NO_BOOST_CMAKE TRUE)
+
+message(STATUS "Environment:")
+message(STATUS "  LOADEDMODULES: $ENV{LOADEDMODULES}")
+message(STATUS "  BOOST_ROOT: $ENV{BOOST_ROOT}")
+message(STATUS "  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+
+find_package(Boost COMPONENTS context fiber QUIET)
 
 if(NOT Boost_FOUND)
     message(STATUS "System Boost not found, building from submodule")
+    message(STATUS "Last error: ${Boost_ERROR_REASON}")
     
     # Get the submodule path
     get_filename_component(PROJECT_ROOT "${CMAKE_SOURCE_DIR}/.." ABSOLUTE)
@@ -16,7 +25,7 @@ if(NOT Boost_FOUND)
 
     # Build boost
     execute_process(
-        COMMAND ./bootstrap.sh --with-libraries=context
+        COMMAND ./bootstrap.sh --with-libraries=context,fiber
         WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
         RESULT_VARIABLE BOOST_BOOTSTRAP_RESULT
         OUTPUT_VARIABLE BOOST_BOOTSTRAP_OUTPUT
@@ -31,6 +40,7 @@ if(NOT Boost_FOUND)
         COMMAND ./b2 install 
             --prefix=${BOOST_SUBMODULE_PATH}/install
             --with-context
+            --with-fiber
             link=shared
             threading=multi
             variant=release
@@ -49,6 +59,7 @@ if(NOT Boost_FOUND)
     set(Boost_INCLUDE_DIRS ${BOOST_ROOT}/include)
     set(Boost_LIBRARY_DIRS ${BOOST_ROOT}/lib)
     set(Boost_CONTEXT_LIBRARY ${BOOST_ROOT}/lib/libboost_context${CMAKE_SHARED_LIBRARY_SUFFIX})
+    set(Boost_FIBER_LIBRARY ${BOOST_ROOT}/lib/libboost_fiber${CMAKE_SHARED_LIBRARY_SUFFIX})
     set(Boost_VERSION "1.85.0")
     set(Boost_FOUND TRUE)
 endif()
@@ -59,6 +70,7 @@ message(STATUS "  Boost root: ${BOOST_ROOT}")
 message(STATUS "  Include dirs: ${Boost_INCLUDE_DIRS}")
 message(STATUS "  Library dirs: ${Boost_LIBRARY_DIRS}")
 message(STATUS "  Context library: ${Boost_CONTEXT_LIBRARY}")
+message(STATUS "  Fiber library: ${Boost_FIBER_LIBRARY}")
 
 # Set variables for parent scope
 set(BOOST_CMAKE_ARGS
@@ -66,4 +78,6 @@ set(BOOST_CMAKE_ARGS
     -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIRS}
     -DBoost_LIBRARY_DIR=${Boost_LIBRARY_DIRS}
     -DBOOST_ROOT=${BOOST_ROOT}
+    -DBoost_NO_SYSTEM_PATHS=TRUE
+    -DBoost_NO_BOOST_CMAKE=TRUE
 )
