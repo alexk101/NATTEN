@@ -37,7 +37,37 @@ else()
     message(STATUS "Build directory not found")
 endif()
 
-if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build")
+# Function to check if AdaptiveCpp is properly built
+function(is_acpp_built RESULT_VAR)
+    set(REQUIRED_FILES
+        "${ACPP_SUBMODULE_PATH}/build/install/lib/cmake/AdaptiveCpp/adaptivecpp-config.cmake"
+        "${ACPP_SUBMODULE_PATH}/build/install/include/AdaptiveCpp/sycl/sycl.hpp"
+        "${ACPP_SUBMODULE_PATH}/build/install/lib/libsycl${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
+    
+    set(ALL_FILES_EXIST TRUE)
+    foreach(FILE ${REQUIRED_FILES})
+        if(NOT EXISTS "${FILE}")
+            set(ALL_FILES_EXIST FALSE)
+            message(STATUS "Missing required file: ${FILE}")
+            break()
+        endif()
+    endforeach()
+    
+    set(${RESULT_VAR} ${ALL_FILES_EXIST} PARENT_SCOPE)
+endfunction()
+
+# Check if AdaptiveCpp is properly built
+is_acpp_built(ACPP_BUILT)
+
+# Build if necessary
+if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT ${ACPP_BUILT})
+    # Remove existing build directory if it exists
+    if(EXISTS "${ACPP_SUBMODULE_PATH}/build")
+        message(STATUS "Removing existing build directory")
+        file(REMOVE_RECURSE "${ACPP_SUBMODULE_PATH}/build")
+    endif()
+    
     message(STATUS "Building AdaptiveCpp from submodule using ROCm at: ${ROCM_PATH}")
     execute_process(
         COMMAND ${CMAKE_COMMAND} -B build 
@@ -45,17 +75,28 @@ if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build"
             -DROCM_PATH=${ROCM_PATH}
             -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
             -DADAPTIVECPP_INSTALL_CMAKE_DIR=lib/cmake/AdaptiveCpp
+            -DBOOST_ROOT=$ENV{BOOST_ROOT}
         WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
         RESULT_VARIABLE BUILD_CONFIG_RESULT
+        OUTPUT_VARIABLE BUILD_CONFIG_OUTPUT
+        ERROR_VARIABLE BUILD_CONFIG_ERROR
     )
     message(STATUS "Build configuration result: ${BUILD_CONFIG_RESULT}")
+    message(STATUS "Build configuration output: ${BUILD_CONFIG_OUTPUT}")
+    message(STATUS "Build configuration error: ${BUILD_CONFIG_ERROR}")
     
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} --build build --target install
-        WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
-        RESULT_VARIABLE BUILD_RESULT
-    )
-    message(STATUS "Build result: ${BUILD_RESULT}")
+    if(BUILD_CONFIG_RESULT EQUAL 0)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} --build build --target install
+            WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
+            RESULT_VARIABLE BUILD_RESULT
+            OUTPUT_VARIABLE BUILD_OUTPUT
+            ERROR_VARIABLE BUILD_ERROR
+        )
+        message(STATUS "Build result: ${BUILD_RESULT}")
+        message(STATUS "Build output: ${BUILD_OUTPUT}")
+        message(STATUS "Build error: ${BUILD_ERROR}")
+    endif()
 endif()
 
 # Check if config files were generated
