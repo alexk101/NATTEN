@@ -13,9 +13,10 @@ function(build_boost_from_submodule)
     
     message(STATUS "Building Boost from submodule at: ${BOOST_SUBMODULE_PATH}")
     
-    # Bootstrap
+    # Bootstrap with all required components
     execute_process(
-        COMMAND ./bootstrap.sh --prefix=${PROJECT_BINARY_DIR}/boost_install --with-libraries=context,fiber
+        COMMAND ./bootstrap.sh --prefix=${PROJECT_BINARY_DIR}/boost_install 
+            --with-libraries=context,fiber,atomic,chrono,system
         WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
         RESULT_VARIABLE BOOTSTRAP_RESULT
         OUTPUT_VARIABLE BOOTSTRAP_OUTPUT
@@ -23,12 +24,14 @@ function(build_boost_from_submodule)
     )
     
     if(NOT BOOTSTRAP_RESULT EQUAL 0)
+        message(STATUS "Bootstrap output: ${BOOTSTRAP_OUTPUT}")
         message(FATAL_ERROR "Failed to bootstrap Boost: ${BOOTSTRAP_ERROR}")
     endif()
     
-    # Build and install using b2
+    # Build and install using b2 with all required components
     execute_process(
-        COMMAND ./b2 install --prefix=${PROJECT_BINARY_DIR}/boost_install --with-context --with-fiber
+        COMMAND ./b2 install --prefix=${PROJECT_BINARY_DIR}/boost_install 
+            --with-context --with-fiber --with-atomic --with-chrono --with-system
         WORKING_DIRECTORY ${BOOST_SUBMODULE_PATH}
         RESULT_VARIABLE BUILD_RESULT
         OUTPUT_VARIABLE BUILD_OUTPUT
@@ -36,6 +39,7 @@ function(build_boost_from_submodule)
     )
     
     if(NOT BUILD_RESULT EQUAL 0)
+        message(STATUS "Build output: ${BUILD_OUTPUT}")
         message(FATAL_ERROR "Failed to build Boost: ${BUILD_ERROR}")
     endif()
     
