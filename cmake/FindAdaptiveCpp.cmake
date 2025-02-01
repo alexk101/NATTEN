@@ -36,6 +36,10 @@ if(NOT AdaptiveCpp_FOUND)
         # Include our Boost build system
         include(${CMAKE_CURRENT_LIST_DIR}/FindBoostDeps.cmake)
         
+        set(CMAKE_CXX_STANDARD 17)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        set(CMAKE_CXX_EXTENSIONS OFF)
+        
         execute_process(
             COMMAND ${CMAKE_COMMAND} 
                 -S "${ACPP_SUBMODULE_PATH}"
@@ -45,6 +49,8 @@ if(NOT AdaptiveCpp_FOUND)
                 -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
                 -DCMAKE_CXX_COMPILER=CC
                 -DCMAKE_C_COMPILER=cc
+                -DCMAKE_CXX_STANDARD=17
+                -DCMAKE_CXX_STANDARD_REQUIRED=ON
                 ${BOOST_CMAKE_ARGS}
             RESULT_VARIABLE BUILD_RESULT
             OUTPUT_VARIABLE BUILD_OUTPUT

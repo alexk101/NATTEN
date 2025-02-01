@@ -9,7 +9,7 @@ message(STATUS "  LOADEDMODULES: $ENV{LOADEDMODULES}")
 message(STATUS "  BOOST_ROOT: $ENV{BOOST_ROOT}")
 message(STATUS "  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
-find_package(Boost COMPONENTS context fiber QUIET)
+find_package(Boost COMPONENTS context QUIET)
 
 if(NOT Boost_FOUND)
     message(STATUS "System Boost not found, building from submodule")
