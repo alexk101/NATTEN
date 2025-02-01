@@ -1,7 +1,7 @@
 # First try to find system Boost
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS context QUIET)
+find_package(BOOST COMPONENTS context QUIET)
 
 if(NOT Boost_FOUND)
     message(STATUS "System Boost not found, building from submodule")
@@ -55,6 +55,7 @@ endif()
 
 message(STATUS "Using Boost:")
 message(STATUS "  Version: ${Boost_VERSION}")
+message(STATUS "  Boost root: ${BOOST_ROOT}")
 message(STATUS "  Include dirs: ${Boost_INCLUDE_DIRS}")
 message(STATUS "  Library dirs: ${Boost_LIBRARY_DIRS}")
 message(STATUS "  Context library: ${Boost_CONTEXT_LIBRARY}")
