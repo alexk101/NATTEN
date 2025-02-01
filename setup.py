@@ -56,6 +56,7 @@ FORCE_CUDA = (
 HAS_CUDA = FORCE_CUDA or (torch.cuda.is_available() and (CUDA_HOME is not None))
 NATTEN_IS_BUILDING_DIST = bool(os.getenv("NATTEN_IS_BUILDING_DIST", 0))
 DEFAULT_N_WORKERS = max(1, (multiprocessing.cpu_count() // 4))
+HAS_ACPP = os.getenv("NATTEN_WITH_ACPP", "0") == "1"
 
 cuda_arch = os.getenv("NATTEN_CUDA_ARCH", "")
 if FORCE_CUDA and not cuda_arch:
@@ -159,23 +160,14 @@ def get_acpp_home():
     if IS_WINDOWS:
         return None  # AdaptiveCpp doesn't support Windows yet
     
-    # Check submodule location first
-    this_dir = path.dirname(path.abspath(__file__))
-    submodule_path = path.join(this_dir, "third_party/AdaptiveCpp")
-    if path.exists(submodule_path):
+    # Always check submodule location first
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    submodule_path = os.path.join(this_dir, "third_party/AdaptiveCpp")
+    if os.path.exists(submodule_path):
         return submodule_path
     
-    # Then check environment variable
-    acpp_home = os.environ.get('ACPP_HOME')
-    if acpp_home:
-        return acpp_home
-    
-    # Finally check common install locations
-    common_paths = ['/opt/adaptivecpp', '/usr/local/adaptivecpp']
-    for path in common_paths:
-        if os.path.exists(path):
-            return path
-    return None
+    # Only fallback to environment variable if submodule is not available
+    return os.environ.get('ACPP_HOME')
 
 def get_acpp_arch():
     """Get target AMD GPU architecture"""
@@ -246,11 +238,9 @@ class BuildExtension(build_ext):
         if not os.path.exists(so_dir):
             os.makedirs(so_dir)
 
-        # AdaptiveCpp Detection
+        # AdaptiveCpp Detection and Setup
         acpp_home = get_acpp_home()
-        has_acpp = acpp_home is not None and os.environ.get('NATTEN_WITH_ACPP', '0') == '1'
-        
-        if has_acpp:
+        if HAS_ACPP and acpp_home is not None:
             cmake_args.append(f"-DACPP_HOME={acpp_home}")
             cmake_args.append("-DNATTEN_WITH_ACPP=1")
             
@@ -260,6 +250,12 @@ class BuildExtension(build_ext):
             # Add AdaptiveCpp specific compile flags
             cmake_args.append("-DCMAKE_CXX_FLAGS=-fsycl")
             cmake_args.append("-DCMAKE_SYCL_FLAGS=-fsycl-targets=amdgcn-amd-amdhsa")
+            cmake_args.append("-DACPP_TARGETS=hip")  # Explicitly set HIP as target
+
+        if HAS_ACPP:
+            print(f"Building NATTEN with AdaptiveCpp")
+            acpp_arch = get_acpp_arch()
+            print(f"Building NATTEN for AMD GPU arch: {acpp_arch}")
 
         # Config and build the extension
         subprocess.check_call(

@@ -10,6 +10,7 @@ module load cmake
 module load ninja/1.11.1
 
 # Set NATTEN environment variables
+# AdaptiveCpp will be detected from submodule automatically
 export NATTEN_WITH_ACPP=1
 export NATTEN_ACPP_ARCH=gfx90a
 export NATTEN_N_WORKERS=8
