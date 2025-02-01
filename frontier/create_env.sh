@@ -15,6 +15,13 @@ export NATTEN_WITH_ACPP=1
 export NATTEN_ACPP_ARCH=gfx90a
 export NATTEN_N_WORKERS=8
 
+# Compiler
+export CC=craycc
+export CXX=craycxx
+
+# ROCM
+export ROCM_PATH=/opt/rocm-$ROCM_VERSION
+
 # Print confirmation
 echo "NATTEN development environment loaded"
 echo "NATTEN_ACPP_ARCH: $NATTEN_ACPP_ARCH"
@@ -63,9 +70,6 @@ mamba install -p $ENV_PATH pytest -y
 conda env export -p $ENV_PATH > natten_env.yaml
 
 echo "Environment created and exported to natten_env.yaml" 
-
-export CC=craycc
-export CXX=craycxx
 
 # Build and install NATTEN
 cd ..

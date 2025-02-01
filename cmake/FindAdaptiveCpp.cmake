@@ -6,12 +6,24 @@
 # ACPP_LIBRARIES - AdaptiveCpp libraries
 # ACPP_VERSION - AdaptiveCpp version
 
+# Allow user to specify ROCm path, with a default for standard installations
+if(NOT DEFINED ROCM_PATH)
+    set(ROCM_PATH $ENV{ROCM_PATH})
+    if(NOT DEFINED ROCM_PATH)
+        set(ROCM_PATH "/opt/rocm")
+    endif()
+endif()
+
 # First build and install AdaptiveCpp from submodule if not already done
 set(ACPP_SUBMODULE_PATH "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp")
 if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build")
-    message(STATUS "Building AdaptiveCpp from submodule...")
+    message(STATUS "Building AdaptiveCpp from submodule using ROCm at: ${ROCM_PATH}")
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -B build -DWITH_ROCM_BACKEND=ON -DROCM_PATH=/opt/rocm
+        COMMAND ${CMAKE_COMMAND} -B build 
+            -DWITH_ROCM_BACKEND=ON 
+            -DROCM_PATH=${ROCM_PATH}
+            -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
+            -DADAPTIVECPP_INSTALL_CMAKE_DIR=lib/cmake/AdaptiveCpp
         WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
     )
     execute_process(

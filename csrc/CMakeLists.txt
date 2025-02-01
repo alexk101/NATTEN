@@ -22,6 +22,7 @@ endif()
 if(${NATTEN_WITH_ACPP})
   # Set ACPP targets before finding package
   set(ACPP_TARGETS "hip:${NATTEN_ACPP_ARCH}")
+  set(AdaptiveCpp_DIR "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp/build/install/lib/cmake/AdaptiveCpp")
   find_package(AdaptiveCpp REQUIRED)
   message("Building NATTEN with AdaptiveCpp for ${NATTEN_ACPP_ARCH}")
   add_definitions(-DNATTEN_WITH_ACPP)
