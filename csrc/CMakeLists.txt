@@ -1,6 +1,9 @@
 # Copyright (c) 2022-2024 Ali Hassani.
 
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+# Add cmake directory to module path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 if(${NATTEN_WITH_CUDA})
   project(natten LANGUAGES CXX CUDA)
 elseif(${NATTEN_WITH_ACPP})
@@ -17,10 +20,36 @@ endif()
 
 # Find AdaptiveCpp if enabled
 if(${NATTEN_WITH_ACPP})
+  # Set ACPP targets before finding package
+  set(ACPP_TARGETS "hip:${NATTEN_ACPP_ARCH}")
   find_package(AdaptiveCpp REQUIRED)
   message("Building NATTEN with AdaptiveCpp for ${NATTEN_ACPP_ARCH}")
   add_definitions(-DNATTEN_WITH_ACPP)
   add_definitions(-DNATTEN_ACPP_ARCH=${NATTEN_ACPP_ARCH})
+  
+  # Add SYCL compilation flags
+  set_target_properties(natten PROPERTIES COMPILE_FLAGS "-fsycl")
+  
+  # Specify SYCL sources
+  file(GLOB ACPP_SOURCES 
+    ./src/pytorch/acpp/*.cpp
+    ./autogen/src/acpp/*.cpp
+  )
+  
+  # Add SYCL target compilation
+  add_sycl_to_target(
+    TARGET natten
+    SOURCES ${ACPP_SOURCES}
+  )
+  
+  # Link with AdaptiveCpp
+  target_include_directories(natten PRIVATE ${ACPP_INCLUDE_DIRS})
+  target_link_libraries(natten PRIVATE ${ACPP_LIBRARIES})
+  
+  # Set ROCm-specific flags
+  target_compile_options(natten PRIVATE
+    -Xsycl-target-backend --offload-arch=${NATTEN_ACPP_ARCH}
+  )
 endif()
 
 set(CXX_STD "17" CACHE STRING "C++ standard")
@@ -240,9 +269,11 @@ if(${NATTEN_WITH_ACPP})
   target_link_libraries(natten PRIVATE ${ACPP_LIBRARIES})
   
   # Add SYCL compilation flags
+  set_target_properties(natten PROPERTIES COMPILE_FLAGS "-fsycl")
+  add_sycl_to_target(TARGET natten)
+  
+  # Set ROCm-specific flags
   target_compile_options(natten PRIVATE
-    -fsycl
-    -fsycl-targets=amdgcn-amd-amdhsa
     -Xsycl-target-backend --offload-arch=${NATTEN_ACPP_ARCH}
   )
 endif()
