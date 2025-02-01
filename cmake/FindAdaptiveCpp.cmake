@@ -6,6 +6,10 @@
 # ACPP_LIBRARIES - AdaptiveCpp libraries
 # ACPP_VERSION - AdaptiveCpp version
 
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+message(STATUS "CMAKE_CURRENT_LIST_DIR: ${CMAKE_CURRENT_LIST_DIR}")
+
 # Allow user to specify ROCm path, with a default for standard installations
 if(NOT DEFINED ROCM_PATH)
     set(ROCM_PATH $ENV{ROCM_PATH})
@@ -13,9 +17,14 @@ if(NOT DEFINED ROCM_PATH)
         set(ROCM_PATH "/opt/rocm")
     endif()
 endif()
+message(STATUS "Using ROCM_PATH: ${ROCM_PATH}")
 
 # First build and install AdaptiveCpp from submodule if not already done
 set(ACPP_SUBMODULE_PATH "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp")
+message(STATUS "Checking submodule path: ${ACPP_SUBMODULE_PATH}")
+message(STATUS "Submodule exists: ${EXISTS ${ACPP_SUBMODULE_PATH}}")
+message(STATUS "Build directory exists: ${EXISTS ${ACPP_SUBMODULE_PATH}/build}")
+
 if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build")
     message(STATUS "Building AdaptiveCpp from submodule using ROCm at: ${ROCM_PATH}")
     execute_process(
@@ -25,12 +34,22 @@ if(EXISTS "${ACPP_SUBMODULE_PATH}" AND NOT EXISTS "${ACPP_SUBMODULE_PATH}/build"
             -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
             -DADAPTIVECPP_INSTALL_CMAKE_DIR=lib/cmake/AdaptiveCpp
         WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
+        RESULT_VARIABLE BUILD_CONFIG_RESULT
     )
+    message(STATUS "Build configuration result: ${BUILD_CONFIG_RESULT}")
+    
     execute_process(
         COMMAND ${CMAKE_COMMAND} --build build --target install
         WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
+        RESULT_VARIABLE BUILD_RESULT
     )
+    message(STATUS "Build result: ${BUILD_RESULT}")
 endif()
+
+# Check if config files were generated
+set(CONFIG_FILE "${ACPP_SUBMODULE_PATH}/build/install/lib/cmake/AdaptiveCpp/adaptivecpp-config.cmake")
+message(STATUS "Looking for config file at: ${CONFIG_FILE}")
+message(STATUS "Config file exists: ${EXISTS ${CONFIG_FILE}}")
 
 # Now look for the installed AdaptiveCpp
 find_path(ACPP_INCLUDE_DIR

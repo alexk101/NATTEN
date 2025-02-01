@@ -20,6 +20,14 @@ endif()
 
 # Find AdaptiveCpp if enabled
 if(${NATTEN_WITH_ACPP})
+  message(STATUS "Current CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+  message(STATUS "Looking for FindAdaptiveCpp.cmake in: ${CMAKE_SOURCE_DIR}/cmake")
+  if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/FindAdaptiveCpp.cmake")
+    message(STATUS "FindAdaptiveCpp.cmake exists")
+  else()
+    message(STATUS "FindAdaptiveCpp.cmake not found!")
+  endif()
+  
   # Set ACPP targets before finding package
   set(ACPP_TARGETS "hip:${NATTEN_ACPP_ARCH}")
   set(AdaptiveCpp_DIR "${CMAKE_SOURCE_DIR}/third_party/AdaptiveCpp/build/install/lib/cmake/AdaptiveCpp")
