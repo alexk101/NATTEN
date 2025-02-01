@@ -32,25 +32,18 @@ if(NOT AdaptiveCpp_FOUND)
     if(EXISTS "${ACPP_SUBMODULE_PATH}/CMakeLists.txt")
         message(STATUS "Building AdaptiveCpp from submodule")
         
-        # Configure Boost before building AdaptiveCpp
-        set(Boost_NO_SYSTEM_PATHS ON)
-        set(Boost_USE_STATIC_LIBS OFF)
-        set(Boost_USE_MULTITHREADED ON)
-        set(BOOST_ROOT $ENV{BOOST_ROOT})
-        set(BOOST_INCLUDEDIR $ENV{BOOST_ROOT}/include)
-        set(BOOST_LIBRARYDIR $ENV{BOOST_ROOT}/lib)
-        
-        message(STATUS "Boost configuration:")
-        message(STATUS "  BOOST_ROOT: ${BOOST_ROOT}")
-        message(STATUS "  BOOST_INCLUDEDIR: ${BOOST_INCLUDEDIR}")
-        message(STATUS "  BOOST_LIBRARYDIR: ${BOOST_LIBRARYDIR}")
-        
-        find_package(Boost COMPONENTS context fiber REQUIRED)
-        message(STATUS "Found Boost:")
-        message(STATUS "  Boost_VERSION: ${Boost_VERSION}")
-        message(STATUS "  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-        message(STATUS "  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
-        message(STATUS "  Boost_DIR: ${Boost_DIR}")
+        # Try to find Boost first
+        find_package(Boost COMPONENTS context fiber QUIET)
+
+        if(NOT Boost_FOUND)
+            build_boost_from_submodule()
+            find_package(Boost COMPONENTS context fiber REQUIRED)
+        endif()
+
+        message(STATUS "Using Boost:")
+        message(STATUS "  Version: ${Boost_VERSION}")
+        message(STATUS "  Include dirs: ${Boost_INCLUDE_DIRS}")
+        message(STATUS "  Library dirs: ${Boost_LIBRARY_DIRS}")
         
         execute_process(
             COMMAND ${CMAKE_COMMAND} 
