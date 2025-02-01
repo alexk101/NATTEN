@@ -34,7 +34,7 @@ if(NOT AdaptiveCpp_FOUND)
         message(STATUS "Building AdaptiveCpp from submodule")
         
         # Try to find Boost first
-        find_package(Boost COMPONENTS context fiber QUIET)
+        find_package(Boost COMPONENTS context QUIET)
 
         message(STATUS "Using Boost:")
         message(STATUS "  Version: ${Boost_VERSION}")
