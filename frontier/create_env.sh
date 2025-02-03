@@ -45,7 +45,7 @@ if [ -d "$ENV_PATH" ]; then
 
         # Build and install NATTEN
         cd ..
-        $ENV_PATH/bin/pip install -e .
+        $ENV_PATH/bin/pip install -e . 2>&1 | tee natten_build.log
         cd frontier
 
         echo "NATTEN package built and installed in development mode"
@@ -71,7 +71,7 @@ echo "Environment created and exported to natten_env.yaml"
 
 # Build and install NATTEN
 cd ..
-$ENV_PATH/bin/pip install -e .
+$ENV_PATH/bin/pip install -e . 2>&1 | tee natten_build.log
 cd frontier
 
 echo "NATTEN package built and installed in development mode"
