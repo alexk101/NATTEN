@@ -9,6 +9,11 @@ else()
   project(natten LANGUAGES CXX)
 endif()
 
+# Near the top, after project declaration
+if(TARGET natten)
+  return()
+endif()
+
 # Add cmake directory to module path
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
 

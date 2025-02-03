@@ -37,7 +37,7 @@ module load miniforge3
 conda init
 
 # Check if environment exists
-ENV_PATH="$HOME/.miniforge/envs/natten_dev"
+ENV_PATH="$HOME/scratch/.miniforge/envs/natten_dev"
 if [ -d "$ENV_PATH" ]; then
     read -p "Environment natten_dev already exists. Do you want to delete and recreate it? [y/N] " response
     response=${response:-N}  # Default to N if empty

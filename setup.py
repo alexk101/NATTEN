@@ -228,8 +228,11 @@ class BuildExtension(build_ext):
             ), f"Expected the python executable path to end with python.exe, got {python_path}"
             python_lib_dir = python_path.replace("python.exe", "libs").strip()
             cmake_args.append(f"-DPY_LIB_DIR={python_lib_dir}")
-            cmake_args.append("-G Ninja")
             cmake_args.append("-DCMAKE_BUILD_TYPE=Release")
+
+        # Keep the general Ninja configuration (around line 261-262)
+        cmake_args.append("-G Ninja")
+        cmake_args.append("-DCMAKE_BUILD_TYPE=Release")
 
         if not os.path.exists(self.build_lib):
             os.makedirs(self.build_lib)

@@ -54,6 +54,7 @@ if(NOT AdaptiveCpp_FOUND)
                 -DWITH_SSCP_COMPILER=OFF
                 -DWITH_OPENCL_BACKEND=OFF
                 -DWITH_LEVEL_ZERO_BACKEND=OFF
+                -DCMAKE_BUILD_PARALLEL_LEVEL=${NATTEN_N_WORKERS}
                 ${BOOST_CMAKE_ARGS}
             RESULT_VARIABLE BUILD_RESULT
             OUTPUT_VARIABLE BUILD_OUTPUT
@@ -67,8 +68,8 @@ if(NOT AdaptiveCpp_FOUND)
         
         if(BUILD_RESULT EQUAL 0)
             execute_process(
-                COMMAND ${CMAKE_COMMAND} --build build --target install
-                WORKING_DIRECTORY ${ACPP_SUBMODULE_PATH}
+                COMMAND ${CMAKE_COMMAND} --build . -j ${NATTEN_N_WORKERS}
+                WORKING_DIRECTORY "${ACPP_SUBMODULE_PATH}/build"
                 RESULT_VARIABLE BUILD_RESULT
                 OUTPUT_VARIABLE BUILD_OUTPUT
                 ERROR_VARIABLE BUILD_ERROR
