@@ -39,14 +39,17 @@ if(${NATTEN_WITH_ACPP})
   add_definitions(-DNATTEN_WITH_ACPP)
   add_definitions(-DNATTEN_ACPP_ARCH=${NATTEN_ACPP_ARCH})
   
-  # Add SYCL compilation flags
-  set_target_properties(natten PROPERTIES COMPILE_FLAGS "-fsycl")
-  
   # Specify SYCL sources
   file(GLOB ACPP_SOURCES 
     ./src/pytorch/acpp/*.cpp
     ./autogen/src/acpp/*.cpp
   )
+  
+  # Create the target first
+  add_library(natten SHARED ${ACPP_SOURCES})
+  
+  # Then set its properties
+  set_target_properties(natten PROPERTIES COMPILE_FLAGS "-fsycl")
   
   # Add SYCL target compilation
   add_sycl_to_target(
