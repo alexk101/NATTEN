@@ -47,10 +47,13 @@ if(NOT AdaptiveCpp_FOUND)
                 -DWITH_ROCM_BACKEND=ON 
                 -DROCM_PATH=${ROCM_PATH}
                 -DCMAKE_INSTALL_PREFIX=${ACPP_SUBMODULE_PATH}/build/install
-                -DCMAKE_CXX_COMPILER=CC
-                -DCMAKE_C_COMPILER=cc
+                -DCMAKE_CXX_COMPILER=${CXX}
+                -DCMAKE_C_COMPILER=${CC}
                 -DCMAKE_CXX_STANDARD=17
                 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+                -DWITH_SSCP_COMPILER=OFF
+                -DWITH_OPENCL_BACKEND=OFF
+                -DWITH_LEVEL_ZERO_BACKEND=OFF
                 ${BOOST_CMAKE_ARGS}
             RESULT_VARIABLE BUILD_RESULT
             OUTPUT_VARIABLE BUILD_OUTPUT

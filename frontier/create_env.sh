@@ -19,6 +19,11 @@ export NATTEN_N_WORKERS=8
 # Compiler
 export CC=craycc
 export CXX=craycxx
+# Ensure proper C++17 support detection
+export CXXFLAGS="-std=c++17"
+export CMAKE_CXX_STANDARD=17
+export CMAKE_CXX_STANDARD_REQUIRED=ON
+export CMAKE_CXX_FLAGS="-std=c++17"
 
 # ROCM
 export ROCM_PATH=/opt/rocm-$ROCM_VERSION
